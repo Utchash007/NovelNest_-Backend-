@@ -9,7 +9,7 @@ Python Django and Rest Framework are used here.
   - Provides REST APIs using Django REST Framework.
   - Fully functional backend for data handling and business logic.
 
-- **Required Packages**:
+## Required Packages:
   -Django              5.1.4
   -django-cors-headers 4.6.0
   -djangorestframework 3.15.2
