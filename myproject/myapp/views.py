@@ -1,12 +1,18 @@
 from django.shortcuts import render
-from .models import Novel,User,NovelChapter  # Import the Novel model
+from .models import Novel,NovelChapter  # Import the Novel model
 from rest_framework import viewsets
-from .serializers import NovelSerializer, UserSerializer,NovelChaptersSerializer,NovelInfoSerializer
+from .serializers import NovelSerializer, NovelChaptersSerializer,NovelInfoSerializer,UserSerializer
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from django.db import models
 from django.db.models import F
+from rest_framework.permissions import AllowAny, IsAuthenticated
+from django.contrib.auth.models import User
 
+class UserViewSet(viewsets.ModelViewSet):
+    queryset = User.objects.all()
+    serializer_class = UserSerializer
+    permission_classes = [AllowAny]
 
 def novel_list(request):
     # Get all the novels from the database
@@ -17,7 +23,7 @@ def novel_list(request):
 class NovelViewSet(viewsets.ModelViewSet):
     queryset = Novel.objects.all()
     serializer_class = NovelSerializer
-
+    permission_classes = [AllowAny]
     @action(detail=False, methods=['get'])
     def novel(self, request):
         novel_id=request.query_params.get('novel_id', None)
@@ -104,14 +110,15 @@ class NovelViewSet(viewsets.ModelViewSet):
     
 
 
-class UserViewSet(viewsets.ModelViewSet):
-    queryset = User.objects.all()
-    serializer_class = UserSerializer
+#class UserViewSet(viewsets.ModelViewSet):
+    #queryset = User.objects.all()
+    #serializer_class = UserSerializer
+    
 
 class NovelChapterViewSet(viewsets.ModelViewSet):
     queryset = NovelChapter.objects.all()
     serializer_class=NovelChaptersSerializer
-
+    permission_classes = [AllowAny]
     @action(detail=False, methods=['get'])
     def chapters(self, request):
         novel_id=request.query_params.get('novel_id', None)
@@ -135,7 +142,7 @@ class NovelChapterViewSet(viewsets.ModelViewSet):
 class NovelInfoSet(viewsets.ModelViewSet):
     #queryset = NovelChapter.objects.all()
     #serializer_class = NovelInfoSerializer
-
+    permission_classes = [AllowAny]
     @action(detail=False, methods=['get'])
     def chapters(self, request):
         novel_id=request.query_params.get('novel_id', None)
@@ -149,7 +156,7 @@ class NovelInfoSet(viewsets.ModelViewSet):
 class NovelUpdateViewSet(viewsets.ModelViewSet):
     #queryset = Novel.objects.all()
     #serializer_class = NovelSerializer
-
+    permission_classes = [AllowAny]
     @action(detail=False, methods=['get'])
     def read_count_update(self, request):
         novel_id = request.query_params.get('novel_id', None)

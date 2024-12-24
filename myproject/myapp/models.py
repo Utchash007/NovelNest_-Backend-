@@ -39,12 +39,12 @@ class NovelChapter(models.Model):
         db_table = 'novel_chapter'
 
 
-class User(models.Model):
-    user_id = models.AutoField(primary_key=True)
-    user_name = models.CharField(max_length=255)
-    user_email = models.CharField(max_length=20)
-    password = models.CharField(max_length=255)
+#class User(models.Model):
+    #user_id = models.AutoField(primary_key=True)
+    #user_name = models.CharField(max_length=255)
+    #user_email = models.CharField(max_length=20)
+    #password = models.CharField(max_length=255)
 
-    class Meta:
-        managed = False
-        db_table = 'user'
+    #class Meta:
+        #managed = False
+        #db_table = 'user'
