@@ -1,7 +1,7 @@
 from django.shortcuts import render
-from .models import Novel,NovelChapter  # Import the Novel model
+from .models import Novel,NovelChapter,Bookmark,ReadHistory  # Import the Novel model
 from rest_framework import viewsets
-from .serializers import NovelSerializer, NovelChaptersSerializer,NovelInfoSerializer,UserSerializer
+from .serializers import NovelSerializer, NovelChaptersSerializer,NovelInfoSerializer,UserSerializer,BookMarkSerializer,Read_HistorySerializer
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from django.db import models
@@ -13,6 +13,15 @@ class UserViewSet(viewsets.ModelViewSet):
     queryset = User.objects.all()
     serializer_class = UserSerializer
     permission_classes = [AllowAny]
+
+    @action(detail=False, methods=['get'])
+    def get_user(self, request):
+        user_id = request.query_params.get('id', None)
+        if user_id is None:
+            return Response({"error": "user_id is required"}, status=500)
+        user = User.objects.filter(id=user_id)
+        serializer = UserSerializer(user, many=True)
+        return Response(serializer.data)
 
 def novel_list(request):
     # Get all the novels from the database
@@ -176,3 +185,38 @@ class NovelUpdateViewSet(viewsets.ModelViewSet):
         serializer = NovelSerializer(chapters, many=True)
         return Response(serializer.data)
 
+class BookmarkViewSet(viewsets.ModelViewSet):
+    queryset=Bookmark.objects.all()
+    serializer_class=BookMarkSerializer
+    permission_classes = [AllowAny]
+
+class ReadHostoryViewSet(viewsets.ModelViewSet):
+    queryset=ReadHistory.objects.all()  
+    serializer_class=  Read_HistorySerializer
+    permission_classes = [AllowAny]
+
+class UserBookmarkViewSet(viewsets.ModelViewSet):
+    permission_classes = [AllowAny]
+
+    @action(detail=False, methods=['get'])
+    def get_bookmark(self, request):
+        user_id = request.query_params.get('id', None)
+        novel_id=request.query_params.get('novel_id',None)
+        if user_id is None or novel_id is None:
+            return Response({"error": "user_id is required"}, status=500)
+        bookmarks = Bookmark.objects.filter(id=user_id,novel_id=novel_id)
+        serializer = BookMarkSerializer(bookmarks, many=True)
+        if(serializer.data==[]):
+            return Response({"error": "No bookmarks found"}, status=400)
+        return Response(serializer.data)
+    
+    @action(detail=False, methods=['get'])
+    def get(self, request):
+        user_id = request.query_params.get('id', None)
+        if user_id is None:
+            return Response({"error": "user_id is required"}, status=500)
+        bookmarks = Bookmark.objects.filter(id=user_id)
+        serializer = BookMarkSerializer(bookmarks, many=True)
+        if(serializer.data==[]):
+            return Response({"error": "No bookmarks found"}, status=400)
+        return Response(serializer.data) 
