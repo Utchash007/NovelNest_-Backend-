@@ -5,7 +5,7 @@ from .serializers import NovelSerializer, NovelChaptersSerializer,NovelInfoSeria
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from django.db import models
-from django.db.models import F
+from django.db.models import F,Max, Subquery, OuterRef
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from django.contrib.auth.models import User
 
@@ -195,6 +195,7 @@ class ReadHostoryViewSet(viewsets.ModelViewSet):
     serializer_class=  Read_HistorySerializer
     permission_classes = [AllowAny]
 
+
 class UserBookmarkViewSet(viewsets.ModelViewSet):
     permission_classes = [AllowAny]
 
@@ -220,3 +221,26 @@ class UserBookmarkViewSet(viewsets.ModelViewSet):
         if(serializer.data==[]):
             return Response({"error": "No bookmarks found"}, status=400)
         return Response(serializer.data) 
+
+
+class UserHistory(viewsets.ModelViewSet):
+    permission_classes = [AllowAny]
+
+    @action(detail=False, methods=['get'])
+    def get_history(self, request):
+        user_id = request.query_params.get('id', None)
+        if user_id is None:
+         return Response({"error": "user_id is required"}, status=400)
+
+    # Get the latest timeline for each novel_id
+        latest_timeline = ReadHistory.objects.filter(id=user_id).values('novel_id').annotate(
+            max_timeline=Max('timeline')
+            ).values('max_timeline')
+
+    # Filter records with the latest timeline
+        read_history = ReadHistory.objects.filter(
+         id=user_id, timeline__in=Subquery(latest_timeline)
+          ).order_by('-timeline')
+
+        serializer = Read_HistorySerializer(read_history, many=True)
+        return Response(serializer.data)

@@ -1,6 +1,6 @@
 from django.urls import path, include
 from rest_framework.routers import DefaultRouter
-from .views import NovelViewSet,NovelChapterViewSet,NovelInfoSet,NovelUpdateViewSet,UserViewSet,BookmarkViewSet,UserBookmarkViewSet,ReadHostoryViewSet 
+from .views import NovelViewSet,NovelChapterViewSet,NovelInfoSet,NovelUpdateViewSet,UserViewSet,BookmarkViewSet,UserBookmarkViewSet,ReadHostoryViewSet,UserHistory
 from rest_framework_simplejwt.views import (
     TokenObtainPairView,
     TokenRefreshView,
@@ -16,6 +16,7 @@ router.register(r'update_novel', NovelUpdateViewSet, basename='update_novel')
 router.register(r'bookmark', BookmarkViewSet, basename='bookmark')
 router.register(r'bookmarks', UserBookmarkViewSet, basename='bookmarks')
 router.register(r'user_history', ReadHostoryViewSet,basename="user_history")
+router.register(r'history', UserHistory, basename="history")
 urlpatterns = [
     path('api/', include(router.urls)),  #API routes prefixed with 'api/'
     path('api/token/', TokenObtainPairView.as_view(), name='token_obtain_pair'),
