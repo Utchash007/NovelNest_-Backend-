@@ -5,11 +5,7 @@ from .serializers import NovelSerializer, NovelChaptersSerializer,NovelInfoSeria
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from django.db import models
-<<<<<<< HEAD
 from django.db.models import Q,F,Max, Subquery, OuterRef,Avg
-=======
-from django.db.models import F
->>>>>>> parent of 36eee5f (Update)
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from django.contrib.auth.models import User
 
@@ -258,7 +254,6 @@ class UserBookmarkViewSet(viewsets.ModelViewSet):
         if(serializer.data==[]):
             return Response({"error": "No bookmarks found"}, status=400)
         return Response(serializer.data) 
-<<<<<<< HEAD
 
 
 class UserHistory(viewsets.ModelViewSet):
@@ -340,5 +335,3 @@ class RatingViewSet(viewsets.ModelViewSet):
         avg_rating=Rating.objects.filter(novel_id=novel_id).aggregate(Avg('user_rating'))
         avg_value = avg_rating.get('user_rating__avg', 0)
         return Response([{"novel_id": novel_id, "average_rating": avg_value}], status=200)
-=======
->>>>>>> parent of 36eee5f (Update)
