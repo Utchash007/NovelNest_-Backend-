@@ -7,6 +7,21 @@
 # Feel free to rename the models, but don't rename db_table values or field names.
 from django.db import models
 
+class AuthUser(models.Model):
+    password = models.CharField(max_length=128)
+    last_login = models.DateTimeField(blank=True, null=True)
+    is_superuser = models.IntegerField()
+    username = models.CharField(unique=True, max_length=150)
+    first_name = models.CharField(max_length=150)
+    last_name = models.CharField(max_length=150)
+    email = models.CharField(max_length=254)
+    is_staff = models.IntegerField()
+    is_active = models.IntegerField()
+    date_joined = models.DateTimeField()
+
+    class Meta:
+        managed = False
+        db_table = 'auth_user'
 
 class Novel(models.Model):
     novel_id = models.PositiveBigIntegerField(primary_key=True)
@@ -69,3 +84,21 @@ class ReadHistory(models.Model):
     class Meta:
         managed = False
         db_table = 'read_history'
+
+class Authors(models.Model):
+    novel_id = models.PositiveBigIntegerField(primary_key=True)
+    author = models.CharField(db_column='Author', max_length=255)  # Field name made lowercase.
+
+    class Meta:
+        managed = False
+        db_table = 'authors'
+
+class Rating(models.Model):
+    rating_id = models.AutoField(primary_key=True)
+    id = models.ForeignKey(AuthUser, models.CASCADE, db_column='id', blank=True, null=True)
+    novel_id = models.ForeignKey(Novel, models.CASCADE, db_column='novel_id',blank=True, null=True,related_name='ratings')
+    user_rating = models.DecimalField(max_digits=3, decimal_places=2, blank=True, null=True)
+
+    class Meta:
+        managed = False
+        db_table = 'rating'

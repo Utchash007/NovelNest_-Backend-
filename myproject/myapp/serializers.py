@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Novel,NovelChapter,Bookmark,ReadHistory
+from .models import Novel,NovelChapter,Bookmark, Rating,ReadHistory, Authors
 from django.contrib.auth.models import User
 
 class UserSerializer(serializers.ModelSerializer):
@@ -36,4 +36,12 @@ class Read_HistorySerializer(serializers.ModelSerializer):
         model = ReadHistory
         fields = '__all__'
 
+class AuthorSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Authors
+        fields = '__all__'
 
+class RatingSerializer(serializers.ModelSerializer):
+    class Meta:
+         model= Rating
+         fields='__all__'

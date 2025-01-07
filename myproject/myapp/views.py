@@ -1,11 +1,15 @@
 from django.shortcuts import render
-from .models import Novel,NovelChapter,Bookmark,ReadHistory  # Import the Novel model
+from .models import Authors, Novel,NovelChapter,Bookmark, Rating,ReadHistory  # Import the Novel model
 from rest_framework import viewsets
-from .serializers import NovelSerializer, NovelChaptersSerializer,NovelInfoSerializer,UserSerializer,BookMarkSerializer,Read_HistorySerializer
+from .serializers import NovelSerializer, NovelChaptersSerializer,NovelInfoSerializer, RatingSerializer,UserSerializer,BookMarkSerializer,Read_HistorySerializer,AuthorSerializer
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from django.db import models
-from django.db.models import F,Max, Subquery, OuterRef
+<<<<<<< HEAD
+from django.db.models import Q,F,Max, Subquery, OuterRef,Avg
+=======
+from django.db.models import F
+>>>>>>> parent of 36eee5f (Update)
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from django.contrib.auth.models import User
 
@@ -116,6 +120,40 @@ class NovelViewSet(viewsets.ModelViewSet):
         genre_novels=Novel.objects.filter(**{genre_field: 1})
         serializer=NovelSerializer(genre_novels,many=True)
         return Response(serializer.data)
+
+    @action(detail=False, methods=['get'])
+    def advanced_search(self, request):
+        action=request.query_params.get('action',None)
+        adventure=request.query_params.get('adventure',None)
+        fantasy=request.query_params.get('fantasy',None)
+        isekai=request.query_params.get('isekai',None)
+        slice_of_life=request.query_params.get('slice_of_life',None)
+        novel_name=request.query_params.get('novel_name',None)
+
+        if action is None and adventure is None and fantasy is None and isekai is None and slice_of_life is None or novel_name is None:
+            return Response({"error": "Atleast one genre is required"},status=400)
+            
+        filter = Q()
+        
+        if action == 'true':
+            filter |= Q(action=1)
+        if adventure =='true':
+            filter |= Q(adventure=1)
+        if  isekai =='true':
+            filter |= Q(isekai=1)
+        if fantasy =='true':
+            filter |= Q(fantasy=1)
+        if slice_of_life =='true':
+            filter |= Q(slice_of_life=1)
+        if novel_name !='ALL':
+            filter &= Q(novel_name__icontains=novel_name)    
+        
+
+        results=Novel.objects.filter(filter)
+        serializer=NovelSerializer(results,many=True)
+        return  Response(serializer.data)
+
+
     
 
 
@@ -195,7 +233,6 @@ class ReadHostoryViewSet(viewsets.ModelViewSet):
     serializer_class=  Read_HistorySerializer
     permission_classes = [AllowAny]
 
-
 class UserBookmarkViewSet(viewsets.ModelViewSet):
     permission_classes = [AllowAny]
 
@@ -221,6 +258,7 @@ class UserBookmarkViewSet(viewsets.ModelViewSet):
         if(serializer.data==[]):
             return Response({"error": "No bookmarks found"}, status=400)
         return Response(serializer.data) 
+<<<<<<< HEAD
 
 
 class UserHistory(viewsets.ModelViewSet):
@@ -244,3 +282,63 @@ class UserHistory(viewsets.ModelViewSet):
 
         serializer = Read_HistorySerializer(read_history, many=True)
         return Response(serializer.data)
+    
+class AuthorViewSet(viewsets.ModelViewSet):
+    queryset= Authors.objects.all()
+    serializer_class=AuthorSerializer
+    permission_classes = [AllowAny]
+
+    @action(detail=False, methods=['get'])
+    def get_authors(self,request):
+        novel_id=request.query_params.get('novel_id', None)
+        if novel_id is None:
+            return Response({"error": "novel_id is required"}, status=500)
+        authors=Authors.objects.filter(novel_id=novel_id)
+        serializer=AuthorSerializer(authors, many=True)
+        return Response(serializer.data)    
+    
+class RatingViewSet(viewsets.ModelViewSet):
+    queryset=Rating.objects.all()
+    serializer_class=RatingSerializer
+    permission_classes = [AllowAny]
+
+    @action(detail=False, methods=['post'])
+    def user_rating(self,request):
+        user_id=request.data.get('user_id','None')
+        novel_id=request.data.get('novel_id','None')
+        user_rating=request.data.get('rating','None')
+        parameter=request.data.get('parameter','None')
+        if parameter =='1':
+            rating=Rating.objects.filter(id=user_id,novel_id=novel_id)
+            serializer=RatingSerializer(rating,many=True)
+            return Response(serializer.data)
+        elif parameter=='2':
+             rating=Rating.objects.filter(id=user_id,novel_id=novel_id).first()
+             if rating is None:
+                 rating=Rating.objects.create(id=user_id, novel_id=novel_id,user_rating=user_rating)
+                 rating=Rating.objects.filter(id=user_id,novel_id=novel_id)
+                 serializer=RatingSerializer(rating,many=True)
+                 return Response(serializer.data)
+             else:
+                 rating.user_rating=float(user_rating)
+                 rating.save()
+                 rating=Rating.objects.filter(id=user_id,novel_id=novel_id)
+                 serializer=RatingSerializer(rating,many=True)
+                 return Response(serializer.data)
+        else :
+            if novel_id is None:
+                return Response({"error": "novel_id is required"}, status=500)
+            avg_rating=Rating.objects.filter(novel_id=novel_id).aggregate(Avg('user_rating'))
+            avg_value = avg_rating.get('user_rating__avg', 0)
+            return Response([{"novel_id": novel_id, "average_rating": avg_value}], status=200)
+    
+    @action(detail=False, methods=['get'])
+    def avgrate(self,request):
+        novel_id=request.query_params.get('novel_id',None)
+        if novel_id is None:
+            return Response({"error": "novel_id is required"}, status=500)
+        avg_rating=Rating.objects.filter(novel_id=novel_id).aggregate(Avg('user_rating'))
+        avg_value = avg_rating.get('user_rating__avg', 0)
+        return Response([{"novel_id": novel_id, "average_rating": avg_value}], status=200)
+=======
+>>>>>>> parent of 36eee5f (Update)
