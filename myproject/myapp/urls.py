@@ -1,13 +1,10 @@
 from django.urls import path, include
 from rest_framework.routers import DefaultRouter
-<<<<<<< HEAD
 from .views import (NovelViewSet,NovelChapterViewSet,NovelInfoSet,
                     NovelUpdateViewSet,UserViewSet,BookmarkViewSet,
                     UserBookmarkViewSet,ReadHostoryViewSet,UserHistory,
                     AuthorViewSet, RatingViewSet)
-=======
 from .views import NovelViewSet,NovelChapterViewSet,NovelInfoSet,NovelUpdateViewSet,UserViewSet,BookmarkViewSet,UserBookmarkViewSet,ReadHostoryViewSet 
->>>>>>> parent of 36eee5f (Update)
 from rest_framework_simplejwt.views import (
     TokenObtainPairView,
     TokenRefreshView,
