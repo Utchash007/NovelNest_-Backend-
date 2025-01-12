@@ -65,25 +65,9 @@ class NovelChapter(models.Model):
         #db_table = 'user'
 
 
-class Bookmark(models.Model):
-    id = models.IntegerField()
-    novel_id = models.PositiveBigIntegerField()
-    cpt_no = models.BigIntegerField(blank=True, null=True)
-    bookmark_id = models.AutoField(primary_key=True)
-    class Meta:
-        managed = False
-        db_table = 'bookmark'
 
 
-class ReadHistory(models.Model):
-    id = models.IntegerField()
-    novel_id = models.PositiveBigIntegerField()
-    cpt_no = models.BigIntegerField(blank=True, null=True)
-    timeline = models.DateTimeField(primary_key=True)
 
-    class Meta:
-        managed = False
-        db_table = 'read_history'
 
 class Authors(models.Model):
     novel_id = models.PositiveBigIntegerField(primary_key=True)
@@ -92,13 +76,3 @@ class Authors(models.Model):
     class Meta:
         managed = False
         db_table = 'authors'
-
-class Rating(models.Model):
-    rating_id = models.AutoField(primary_key=True)
-    id = models.ForeignKey(AuthUser, models.CASCADE, db_column='id', blank=True, null=True)
-    novel_id = models.ForeignKey(Novel, models.CASCADE, db_column='novel_id',blank=True, null=True,related_name='ratings')
-    user_rating = models.DecimalField(max_digits=3, decimal_places=2, blank=True, null=True)
-
-    class Meta:
-        managed = False
-        db_table = 'rating'

@@ -1,13 +1,14 @@
 from django.shortcuts import render
-from .models import Authors, Novel,NovelChapter,Bookmark, Rating,ReadHistory  # Import the Novel model
+from .models import Authors, Novel,NovelChapter  # Import the Novel model
 from rest_framework import viewsets
-from .serializers import NovelSerializer, NovelChaptersSerializer,NovelInfoSerializer, RatingSerializer,UserSerializer,BookMarkSerializer,Read_HistorySerializer,AuthorSerializer
+from .serializers import NovelSerializer, NovelChaptersSerializer,NovelInfoSerializer, UserSerializer,AuthorSerializer
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from django.db import models
 from django.db.models import Q,F,Max, Subquery, OuterRef,Avg
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from django.contrib.auth.models import User
+from django.db.models import Avg, Sum, Min, Max, Count
 
 class UserViewSet(viewsets.ModelViewSet):
     queryset = User.objects.all()
@@ -182,6 +183,23 @@ class NovelChapterViewSet(viewsets.ModelViewSet):
         serializer=NovelChaptersSerializer(contents, many=True)
         return Response(serializer.data)
     
+    @action(detail=False, methods=['get'])
+    def chapter_rank(self,request):
+        novel_id=request.query_params.get('novel_id', None)
+        cpt_no=request.query_params.get('cpt_no', None)
+        if novel_id  is None or cpt_no is None:
+            return Response({"error": "One of the both is missing"}, status=500)
+        first=NovelChapter.objects.aggregate(Min('cpt_no'))
+        last=NovelChapter.objects.aggregate(Max('cpt_no'))
+        input_cpt=int(cpt_no)
+        if input_cpt==first["cpt_no__min"]:
+            return Response({"chapter": "First"}, status=200)
+        elif input_cpt==last["cpt_no__max"]:
+            return Response({"chapter": "Last"},status=200)
+        else:
+            return Response({"chapter": "Middle"},status=200)
+
+    
 class NovelInfoSet(viewsets.ModelViewSet):
     #queryset = NovelChapter.objects.all()
     #serializer_class = NovelInfoSerializer
@@ -219,64 +237,6 @@ class NovelUpdateViewSet(viewsets.ModelViewSet):
         serializer = NovelSerializer(chapters, many=True)
         return Response(serializer.data)
 
-class BookmarkViewSet(viewsets.ModelViewSet):
-    queryset=Bookmark.objects.all()
-    serializer_class=BookMarkSerializer
-    permission_classes = [AllowAny]
-
-class ReadHostoryViewSet(viewsets.ModelViewSet):
-    queryset=ReadHistory.objects.all()  
-    serializer_class=  Read_HistorySerializer
-    permission_classes = [AllowAny]
-
-class UserBookmarkViewSet(viewsets.ModelViewSet):
-    permission_classes = [AllowAny]
-
-    @action(detail=False, methods=['get'])
-    def get_bookmark(self, request):
-        user_id = request.query_params.get('id', None)
-        novel_id=request.query_params.get('novel_id',None)
-        if user_id is None or novel_id is None:
-            return Response({"error": "user_id is required"}, status=500)
-        bookmarks = Bookmark.objects.filter(id=user_id,novel_id=novel_id)
-        serializer = BookMarkSerializer(bookmarks, many=True)
-        if(serializer.data==[]):
-            return Response({"error": "No bookmarks found"}, status=400)
-        return Response(serializer.data)
-    
-    @action(detail=False, methods=['get'])
-    def get(self, request):
-        user_id = request.query_params.get('id', None)
-        if user_id is None:
-            return Response({"error": "user_id is required"}, status=500)
-        bookmarks = Bookmark.objects.filter(id=user_id)
-        serializer = BookMarkSerializer(bookmarks, many=True)
-        if(serializer.data==[]):
-            return Response({"error": "No bookmarks found"}, status=400)
-        return Response(serializer.data) 
-
-
-class UserHistory(viewsets.ModelViewSet):
-    permission_classes = [AllowAny]
-
-    @action(detail=False, methods=['get'])
-    def get_history(self, request):
-        user_id = request.query_params.get('id', None)
-        if user_id is None:
-         return Response({"error": "user_id is required"}, status=400)
-
-    # Get the latest timeline for each novel_id
-        latest_timeline = ReadHistory.objects.filter(id=user_id).values('novel_id').annotate(
-            max_timeline=Max('timeline')
-            ).values('max_timeline')
-
-    # Filter records with the latest timeline
-        read_history = ReadHistory.objects.filter(
-         id=user_id, timeline__in=Subquery(latest_timeline)
-          ).order_by('-timeline')
-
-        serializer = Read_HistorySerializer(read_history, many=True)
-        return Response(serializer.data)
     
 class AuthorViewSet(viewsets.ModelViewSet):
     queryset= Authors.objects.all()
@@ -292,46 +252,3 @@ class AuthorViewSet(viewsets.ModelViewSet):
         serializer=AuthorSerializer(authors, many=True)
         return Response(serializer.data)    
     
-class RatingViewSet(viewsets.ModelViewSet):
-    queryset=Rating.objects.all()
-    serializer_class=RatingSerializer
-    permission_classes = [AllowAny]
-
-    @action(detail=False, methods=['post'])
-    def user_rating(self,request):
-        user_id=request.data.get('user_id','None')
-        novel_id=request.data.get('novel_id','None')
-        user_rating=request.data.get('rating','None')
-        parameter=request.data.get('parameter','None')
-        if parameter =='1':
-            rating=Rating.objects.filter(id=user_id,novel_id=novel_id)
-            serializer=RatingSerializer(rating,many=True)
-            return Response(serializer.data)
-        elif parameter=='2':
-             rating=Rating.objects.filter(id=user_id,novel_id=novel_id).first()
-             if rating is None:
-                 rating=Rating.objects.create(id=user_id, novel_id=novel_id,user_rating=user_rating)
-                 rating=Rating.objects.filter(id=user_id,novel_id=novel_id)
-                 serializer=RatingSerializer(rating,many=True)
-                 return Response(serializer.data)
-             else:
-                 rating.user_rating=float(user_rating)
-                 rating.save()
-                 rating=Rating.objects.filter(id=user_id,novel_id=novel_id)
-                 serializer=RatingSerializer(rating,many=True)
-                 return Response(serializer.data)
-        else :
-            if novel_id is None:
-                return Response({"error": "novel_id is required"}, status=500)
-            avg_rating=Rating.objects.filter(novel_id=novel_id).aggregate(Avg('user_rating'))
-            avg_value = avg_rating.get('user_rating__avg', 0)
-            return Response([{"novel_id": novel_id, "average_rating": avg_value}], status=200)
-    
-    @action(detail=False, methods=['get'])
-    def avgrate(self,request):
-        novel_id=request.query_params.get('novel_id',None)
-        if novel_id is None:
-            return Response({"error": "novel_id is required"}, status=500)
-        avg_rating=Rating.objects.filter(novel_id=novel_id).aggregate(Avg('user_rating'))
-        avg_value = avg_rating.get('user_rating__avg', 0)
-        return Response([{"novel_id": novel_id, "average_rating": avg_value}], status=200)
