@@ -1,7 +1,7 @@
 from django.db import models
 
-from myapp.models import AuthUser,Novel
-
+from myapp.models import AuthUser
+from NovelApp.models import Novel
 # Create your models here.
 class Rating(models.Model):
     rating_id = models.AutoField(primary_key=True)

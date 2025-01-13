@@ -26,6 +26,6 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('', include('myapp.urls')),  # Include the myapp URLs
     path('', include('UserRecords.urls')),  # Include the UserRecords URLs
-    path('',include('RatingApp.urls')),
-    path('', views.novel_list),  # URL for the novel list page
+    path('',include('RatingApp.urls')), # URL for the novel list page
+    path('', include('NovelApp.urls')),
 ]
