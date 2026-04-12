@@ -52,8 +52,13 @@ class UserHistory(viewsets.ModelViewSet):
     @action(detail=False, methods=['get'])
     def get_history(self, request):
         user_id = request.query_params.get('id', None)
-        if user_id is None:
-         return Response({"error": "user_id is required"}, status=400)
+        if user_id in (None, '', 'undefined', 'null'):
+            return Response([])
+
+        try:
+            user_id = int(user_id)
+        except (TypeError, ValueError):
+            return Response([])
 
     # Get the latest timeline for each novel_id
         latest_timeline = ReadHistory.objects.filter(id=user_id).values('novel_id').annotate(

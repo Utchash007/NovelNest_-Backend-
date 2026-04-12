@@ -49,4 +49,4 @@ class RatingViewSet(viewsets.ModelViewSet):
             return Response({"error": "novel_id is required"}, status=500)
         avg_rating=Rating.objects.filter(novel_id=novel_id).aggregate(Avg('user_rating'))
         avg_value = avg_rating.get('user_rating__avg', 0)
-        return Response([{"novel_id": novel_id, "average_rating": avg_value}], status=200)
+        return Response([{"novel_id": novel_id, "average_rating": avg_value}], status=200)                  
