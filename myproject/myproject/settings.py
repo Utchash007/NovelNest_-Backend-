@@ -12,8 +12,6 @@ https://docs.djangoproject.com/en/5.1/ref/settings/
 from datetime import timedelta
 from pathlib import Path
 import os
-import pymysql
-pymysql.install_as_MySQLdb()
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -120,12 +118,12 @@ WSGI_APPLICATION = 'myproject.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'novelnest',
-        'USER': os.getenv('USER', ''),
-        'PASSWORD': os.getenv('PASSWORD', ''),
-        'HOST': os.getenv('HOST', ''),
-        'PORT': os.getenv('PORT', ''),
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': os.getenv('PG_NAME', 'novelnest'),
+        'USER': os.getenv('PG_USER', ''),
+        'PASSWORD': os.getenv('PG_PASSWORD', ''),
+        'HOST': os.getenv('PG_HOST', ''),
+        'PORT': os.getenv('PG_PORT', ''),
     }
 }
 
