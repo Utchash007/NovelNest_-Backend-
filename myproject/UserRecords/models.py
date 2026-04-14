@@ -7,7 +7,7 @@ class Bookmark(models.Model):
     cpt_no = models.BigIntegerField(blank=True, null=True)
     bookmark_id = models.AutoField(primary_key=True)
     class Meta:
-        managed = False
+        managed = True
         db_table = 'bookmark'
 
 
@@ -18,5 +18,5 @@ class ReadHistory(models.Model):
     timeline = models.DateTimeField(primary_key=True)
 
     class Meta:
-        managed = False
+        managed = True
         db_table = 'read_history'

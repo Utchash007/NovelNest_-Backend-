@@ -4,19 +4,19 @@ from django.db import models
 class Novel(models.Model):
     novel_id = models.PositiveBigIntegerField(primary_key=True)
     novel_name = models.CharField(max_length=255)
-    status = models.IntegerField()
+    status = models.BooleanField()
     intro = models.TextField()
     novel_img_link = models.CharField(max_length=255)
     rating = models.FloatField(db_column='Rating')  # Field name made lowercase.
-    action = models.IntegerField(db_column='Action')  # Field name made lowercase.
-    adventure = models.IntegerField(db_column='Adventure')  # Field name made lowercase.
-    fantasy = models.IntegerField(db_column='Fantasy')  # Field name made lowercase.
-    isekai = models.IntegerField(db_column='Isekai')  # Field name made lowercase.
-    slice_of_life = models.IntegerField(db_column='Slice_of_Life')  # Field name made lowercase.
+    action = models.BooleanField(db_column='Action')  # Field name made lowercase.
+    adventure = models.BooleanField(db_column='Adventure')  # Field name made lowercase.
+    fantasy = models.BooleanField(db_column='Fantasy')  # Field name made lowercase.
+    isekai = models.BooleanField(db_column='Isekai')  # Field name made lowercase.
+    slice_of_life = models.BooleanField(db_column='Slice_of_Life')  # Field name made lowercase.
     read_count = models.IntegerField(db_column='Read_Count')  # Field name made lowercase.
 
     class Meta:
-        managed = False
+        managed = True
         db_table = 'novel'
 
 
@@ -28,7 +28,7 @@ class NovelChapter(models.Model):
     descript_id = models.AutoField(primary_key=True, db_column='Descript_ID')  # AutoField for auto-increment
 
     class Meta:
-        managed = False
+        managed = True
         db_table = 'novel_chapter'
 
 class Authors(models.Model):
@@ -36,5 +36,5 @@ class Authors(models.Model):
     author = models.CharField(db_column='Author', max_length=255)  # Field name made lowercase.
 
     class Meta:
-        managed = False
+        managed = True
         db_table = 'authors'

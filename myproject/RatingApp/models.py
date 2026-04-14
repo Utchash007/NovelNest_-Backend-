@@ -10,5 +10,5 @@ class Rating(models.Model):
     user_rating = models.DecimalField(max_digits=4, decimal_places=2, blank=True, null=True)
 
     class Meta:
-        managed = False
+        managed = True
         db_table = 'rating'
